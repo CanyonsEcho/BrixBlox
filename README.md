@@ -38,7 +38,7 @@ BrixBlox is a Unity-based game project developed by Canyons and Stan. While it's
 Contributions are welcome! Feel free to fork the project and submit pull requests.
 
 ## License
-This project is licensed under the [MIT License](LICENSE.md).
+This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
 - Thanks to the Unity community for inspiration and support.
