@@ -5,15 +5,17 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Zombie
+  - Sword
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Sword
   - Water
   - UI
-  - 
-  - 
+  - Player
+  - Zombie
   - 
   - 
   - 

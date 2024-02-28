@@ -4,7 +4,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public float speed = 5f;
     public float rotationSpeed = 3f;
-    public float verticalRotationLimit = 80f;
+    public float verticalRotationLimit = 22.5f;
     public float jumpForce = 10f;
 
     public Camera firstPersonCamera;
@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     private float verticalRotation = 0f;
     private bool isWalking = false;
     private Animator anim;
+    private bool hasJumped = false;
 
     private void Start()
     {
@@ -44,29 +45,30 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = new Vector3(horizontalInput, 0f, verticalInput);
         movement = transform.TransformDirection(movement);
         rb.velocity = new Vector3(movement.x * speed, rb.velocity.y, movement.z * speed);
-        
-        isWalking = movement.magnitude > 0f;
+
+        if (movement.magnitude > 0f)
+        {
+            isWalking = true;
+        }
+        else
+        {
+            isWalking = false;
+        }
 
         if (Input.GetMouseButton(1))
         {
             float mouseX = Input.GetAxis("Mouse X") * rotationSpeed;
-            float mouseY = Input.GetAxis("Mouse Y") * rotationSpeed;
+            
+            transform.Rotate(Vector3.up, mouseX);
 
-            Vector3 newRotation = transform.rotation.eulerAngles + new Vector3(0f, mouseX, 0f);
-            rb.MoveRotation(Quaternion.Euler(newRotation));
-
-            verticalRotation -= mouseY;
             verticalRotation = Mathf.Clamp(verticalRotation, -verticalRotationLimit, verticalRotationLimit);
-
-            if (activeCamera != null)
-            {
-                activeCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
-            }
+            firstPersonCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
         }
 
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        if (isGrounded && Input.GetButtonDown("Jump") && !hasJumped)
         {
             rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
+            hasJumped = true;
         }
 
         if (Input.GetKeyDown(KeyCode.F5))
@@ -77,11 +79,23 @@ public class PlayerMovement : MonoBehaviour
         UpdateAnimation();
     }
 
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+            hasJumped = false;
+            AdjustRigidbodyForGrounded();
+        }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            AdjustRigidbodyForGrounded();
         }
     }
 
@@ -90,7 +104,20 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+            AdjustRigidbodyForAirborne();
         }
+    }
+
+    private void AdjustRigidbodyForGrounded()
+    {
+        rb.drag = 5f;
+        rb.angularDrag = 5f;
+    }
+
+    private void AdjustRigidbodyForAirborne()
+    {
+        rb.drag = 2f;
+        rb.angularDrag = 0.05f;
     }
 
     private void SetActiveCamera(Camera newActiveCamera)
@@ -122,16 +149,14 @@ public class PlayerMovement : MonoBehaviour
         {
             anim.Play("Walking");
         }
-        else if (!isGrounded && isWalking)
-        {
-            anim.Play("Walking");
-        }
         else if (!isGrounded && !isWalking)
         {
+            anim.StopPlayback();
             anim.Play("Jumping");
         }
-        else if (isGrounded)
+        else if (isGrounded && !isWalking)
         {
+            anim.StopPlayback();
             anim.Play("Idle");
         }
     }
