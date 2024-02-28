@@ -1,4 +1,4 @@
-# BrixBlox Unity Game
+# BrixBlox
 
 ## Overview
 BrixBlox is a Unity-based game project developed by Canyons and Stan. While it's still in the early stages of development, the game features animations, player movement, and a temporary player model. The goal is to create an engaging gaming experience with future plans for multiplayer interaction, customization, and user-generated content.
